@@ -1,4 +1,4 @@
-#include "mpi.h"
+п»ї#include "mpi.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -15,7 +15,7 @@ float** alloc_2d_float(int rows, int cols);
 float getDistance(float* point1, float* point2);
 float* kmeans(float** normalizedItems);
 
-// Стартовые значения
+// РЎС‚Р°СЂС‚РѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
 const int itemsCount = 517;
 const int paramCount = 4;
 const int clustersCount = 4;
@@ -23,7 +23,7 @@ const int clustersCount = 4;
 
 int main(int argc, char* argv[])
 {
-    // Данные для передачи
+    // Р”Р°РЅРЅС‹Рµ РґР»СЏ РїРµСЂРµРґР°С‡Рё
     int rank;
     float indexResult[1];
     float indexResultMax[1];
@@ -32,25 +32,25 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     srand(time(0) + rank);
 
-    // Начальные данные
+    // РќР°С‡Р°Р»СЊРЅС‹Рµ РґР°РЅРЅС‹Рµ
     float** normalizedItems = alloc_2d_float(itemsCount, paramCount);
 	float* resultBest = new float[clustersCount + 1];
 
-    // Поток с рангом 0 заполняет массив данными
+    // РџРѕС‚РѕРє СЃ СЂР°РЅРіРѕРј 0 Р·Р°РїРѕР»РЅСЏРµС‚ РјР°СЃСЃРёРІ РґР°РЅРЅС‹РјРё
     if (rank == 0) {
 		string path = "dataBase.csv";
 		normalizedItems = readArrayAndNorm(path);
     }
-	// Отправка данных в другие потоки
+	// РћС‚РїСЂР°РІРєР° РґР°РЅРЅС‹С… РІ РґСЂСѓРіРёРµ РїРѕС‚РѕРєРё
 	MPI_Bcast(&(normalizedItems[0][0]), itemsCount * paramCount, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
     indexResult[0] = 999;
-    //Первый процесс шлет другим, остальные получают
+    //РџРµСЂРІС‹Р№ РїСЂРѕС†РµСЃСЃ С€Р»РµС‚ РґСЂСѓРіРёРј, РѕСЃС‚Р°Р»СЊРЅС‹Рµ РїРѕР»СѓС‡Р°СЋС‚
     if (rank != 0) {
 		float* result = new float[clustersCount + 1];
-		// Первая итерация
+		// РџРµСЂРІР°СЏ РёС‚РµСЂР°С†РёСЏ
 		resultBest = kmeans(normalizedItems);
-		// Повторяем kmeans несколько раз и фиксируем лучший
+		// РџРѕРІС‚РѕСЂСЏРµРј kmeans РЅРµСЃРєРѕР»СЊРєРѕ СЂР°Р· Рё С„РёРєСЃРёСЂСѓРµРј Р»СѓС‡С€РёР№
 		for (int i = 0; i < 5; i++) {
 			result = kmeans(normalizedItems);
 			if (result[0] < resultBest[0])
@@ -58,15 +58,15 @@ int main(int argc, char* argv[])
 					resultBest[i] = result[i];
 				}
 		}
-		// Сохраняем результат
+		// РЎРѕС…СЂР°РЅСЏРµРј СЂРµР·СѓР»СЊС‚Р°С‚
 		indexResult[0] = resultBest[0];
     }
 
-    // Ищем лучший результат и отправляем его остальным
+    // РС‰РµРј Р»СѓС‡С€РёР№ СЂРµР·СѓР»СЊС‚Р°С‚ Рё РѕС‚РїСЂР°РІР»СЏРµРј РµРіРѕ РѕСЃС‚Р°Р»СЊРЅС‹Рј
     MPI_Reduce(indexResult, indexResultMax, 1, MPI_FLOAT, MPI_MIN, 0, MPI_COMM_WORLD);
     MPI_Bcast(indexResultMax, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
-	// Если поток имеет лучший результат то он выводит свои результаты
+	// Р•СЃР»Рё РїРѕС‚РѕРє РёРјРµРµС‚ Р»СѓС‡С€РёР№ СЂРµР·СѓР»СЊС‚Р°С‚ С‚Рѕ РѕРЅ РІС‹РІРѕРґРёС‚ СЃРІРѕРё СЂРµР·СѓР»СЊС‚Р°С‚С‹
     if ((rank != 0) && (indexResult[0] == indexResultMax[0])) {
 		cout << "Thread: " << rank << " My result index: " << indexResult[0] << endl;
 		cout << "My clasters weight: ";
@@ -75,20 +75,19 @@ int main(int argc, char* argv[])
 		}
     }
 
-	// Точка выхода
+	// РўРѕС‡РєР° РІС‹С…РѕРґР°
     MPI_Finalize();
     return 0;
 }
 
-// Считывание данных и их нормирование
+// РЎС‡РёС‚С‹РІР°РЅРёРµ РґР°РЅРЅС‹С… Рё РёС… РЅРѕСЂРјРёСЂРѕРІР°РЅРёРµ
 float** readArrayAndNorm(string path) {
-
-	// Открываем потоки чтения
+	// РћС‚РєСЂС‹РІР°РµРј РїРѕС‚РѕРєРё С‡С‚РµРЅРёСЏ
 	string line;
 	ifstream in(path);
 	float** characters = alloc_2d_float(itemsCount, paramCount);
 
-	// Заполняем массив данными
+	// Р—Р°РїРѕР»РЅСЏРµРј РјР°СЃСЃРёРІ РґР°РЅРЅС‹РјРё
 	if (in.is_open())
 	{
 		int i = 0;
@@ -111,7 +110,7 @@ float** readArrayAndNorm(string path) {
 	else
 		cout << "file_not_found" << endl;
 
-	// Поиск экстремумов
+	// РџРѕРёСЃРє СЌРєСЃС‚СЂРµРјСѓРјРѕРІ
 	float extremum[2][paramCount];
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < paramCount; j++) {
@@ -128,7 +127,7 @@ float** readArrayAndNorm(string path) {
 		}
 	}
 
-	// Нормирование
+	// РќРѕСЂРјРёСЂРѕРІР°РЅРёРµ
 	for (int i = 0; i < itemsCount; i++) {
 		for (int j = 0; j < paramCount; j++) {
 			characters[i][j] = (characters[i][j] - extremum[1][j]) / (extremum[0][j] - extremum[1][j]);
@@ -138,7 +137,7 @@ float** readArrayAndNorm(string path) {
 	return characters;
 }
 
-// Функция для передачи матрицы в mpi
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРµСЂРµРґР°С‡Рё РјР°С‚СЂРёС†С‹ РІ mpi
 float** alloc_2d_float(int rows, int cols) {
 	float* data = (float*)malloc(rows * cols * sizeof(float));
 	float** array = (float**)malloc(rows * sizeof(float*));
@@ -147,7 +146,7 @@ float** alloc_2d_float(int rows, int cols) {
 	return array;
 }
 
-// Расстояние между двумя векторами
+// Р Р°СЃСЃС‚РѕСЏРЅРёРµ РјРµР¶РґСѓ РґРІСѓРјСЏ РІРµРєС‚РѕСЂР°РјРё
 float getDistance(float* point1, float* point2) {
 	float distance = 0;
 	for (int i = 0; i < paramCount; i++) {
@@ -156,10 +155,10 @@ float getDistance(float* point1, float* point2) {
 	return pow(distance, (1.0 / paramCount));
 }
 
-// Алгоритм kmeans
+// РђР»РіРѕСЂРёС‚Рј kmeans
 float* kmeans(float** normalizedItems) {
 
-	// Выделяем память 
+	// Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ 
 	float clusterData[itemsCount];
 	int clusterDataIndex[itemsCount];
 	float** clusterVector = alloc_2d_float(itemsCount, paramCount);
@@ -167,7 +166,7 @@ float* kmeans(float** normalizedItems) {
 	int* clusterWeight = new int[clustersCount];
 
 
-	// Задаем начальные значения центров кластеров
+	// Р—Р°РґР°РµРј РЅР°С‡Р°Р»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ С†РµРЅС‚СЂРѕРІ РєР»Р°СЃС‚РµСЂРѕРІ
 	srand(time(0));
 	std::random_device dev;
 	std::mt19937 rng(dev());
@@ -179,14 +178,14 @@ float* kmeans(float** normalizedItems) {
 		}
 	}
 
-	// Переменные для остановки
+	// РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РѕСЃС‚Р°РЅРѕРІРєРё
 	float indexLast = 0;
 	int stopCount = 0;
 
-	// Начало цикла поиска
+	// РќР°С‡Р°Р»Рѕ С†РёРєР»Р° РїРѕРёСЃРєР°
 	while (stopCount != 3) {
 
-		// Обнуляем переменные
+		// РћР±РЅСѓР»СЏРµРј РїРµСЂРµРјРµРЅРЅС‹Рµ
 		for (int i = 0; i < clustersCount; i++) {
 			clusterWeight[i] = 0.0;
 		}
@@ -195,7 +194,7 @@ float* kmeans(float** normalizedItems) {
 			clusterDataIndex[i] = -1;
 		}
 
-		// Распределяем значения по кластерам
+		// Р Р°СЃРїСЂРµРґРµР»СЏРµРј Р·РЅР°С‡РµРЅРёСЏ РїРѕ РєР»Р°СЃС‚РµСЂР°Рј
 		for (int i = 0; i < clustersCount; i++) {
 			for (int j = 0; j < itemsCount; j++) {
 				float distance = getDistance(normalizedItems[j], clusterVector[i]);
@@ -206,7 +205,7 @@ float* kmeans(float** normalizedItems) {
 			}
 		}
 
-		// Сбрасываем значения центров
+		// РЎР±СЂР°СЃС‹РІР°РµРј Р·РЅР°С‡РµРЅРёСЏ С†РµРЅС‚СЂРѕРІ
 		for (int i = 0; i < clustersCount; i++) {
 			for (int j = 0; j < paramCount; j++) {
 				clusterVector[i][j] = 0.0;
@@ -214,7 +213,7 @@ float* kmeans(float** normalizedItems) {
 		}
 
 
-		// Находим новые центры
+		// РќР°С…РѕРґРёРј РЅРѕРІС‹Рµ С†РµРЅС‚СЂС‹
 		for (int i = 0; i < itemsCount; i++) {
 			clusterWeight[clusterDataIndex[i]]++;
 			for (int j = 0; j < paramCount; j++) {
@@ -227,7 +226,7 @@ float* kmeans(float** normalizedItems) {
 			}
 		}
 
-		// Проверка выхода
+		// РџСЂРѕРІРµСЂРєР° РІС‹С…РѕРґР°
 		index = getIndex(normalizedItems, clusterVector, clusterWeight, clusterDataIndex);
 		if (indexLast == index)
 			stopCount++;
@@ -237,7 +236,7 @@ float* kmeans(float** normalizedItems) {
 		}
 	}
 
-	// Передаем результат
+	// РџРµСЂРµРґР°РµРј СЂРµР·СѓР»СЊС‚Р°С‚
 	float* result = new float[clustersCount + 1];
 	result[0] = index;
 	for (int i = 1; i < clustersCount + 1; i++) {
@@ -249,15 +248,15 @@ float* kmeans(float** normalizedItems) {
 
 }
 
-// Вычисление индекса
+// Р’С‹С‡РёСЃР»РµРЅРёРµ РёРЅРґРµРєСЃР°
 float getIndex(float** normalizedItems, float** clusterVector, int* clusterWeight, int* clusterDataIndex) {
 	float dispersion[clustersCount];
 
-	// Обнуляем массив с дисперсией
+	// РћР±РЅСѓР»СЏРµРј РјР°СЃСЃРёРІ СЃ РґРёСЃРїРµСЂСЃРёРµР№
 	for (int i = 0; i < clustersCount; i++)
 		dispersion[i] = 0;
 
-	// Ищем дисперсию S
+	// РС‰РµРј РґРёСЃРїРµСЂСЃРёСЋ S
 	for (int i = 0; i < clustersCount; i++) {
 		for (int j = 0; j < itemsCount; j++) {
 			if (clusterDataIndex[j] == i) {
@@ -267,7 +266,7 @@ float getIndex(float** normalizedItems, float** clusterVector, int* clusterWeigh
 		dispersion[i] /= clusterWeight[i];
 	}
 
-	// Вычислям индекс по формуле DB = (max((Si+Sj)/dij)) / c
+	// Р’С‹С‡РёСЃР»СЏРј РёРЅРґРµРєСЃ РїРѕ С„РѕСЂРјСѓР»Рµ DB = (max((Si+Sj)/dij)) / c
 	float DB = 0;
 	for (int i = 0; i < clustersCount; i++) {
 		float maxDivision = -1;
