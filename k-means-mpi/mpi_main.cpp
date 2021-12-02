@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-// Считывание данных и их нормирование
+// Считывание данных и их нормализация
 float** readArrayAndNorm(string path) {
 	// Открываем потоки чтения
 	string line;
@@ -127,7 +127,7 @@ float** readArrayAndNorm(string path) {
 		}
 	}
 
-	// Нормирование
+	// Нормализация
 	for (int i = 0; i < itemsCount; i++) {
 		for (int j = 0; j < paramCount; j++) {
 			characters[i][j] = (characters[i][j] - extremum[1][j]) / (extremum[0][j] - extremum[1][j]);
